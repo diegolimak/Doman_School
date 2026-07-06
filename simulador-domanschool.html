@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador — Doman School · Plano de Saúde</title>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1539990701043173');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1539990701043173&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1E3A5F; --navy-dark:#152B47; --blue:#1B7DC4;
+  --blue-light:#7EC8E3; --blue-ice:#EAF5FB; --bg:#F5F4F0;
+  --border:rgba(30,58,95,0.12); --text:#3A4A5C; --muted:#7A8999;
+  --ok:#1a7a3a; --ok-bg:#e8f7ed; --err:#c0392b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy-dark);padding:14px 28px;display:flex;align-items:center;gap:16px;}
+.topbar img{height:40px;width:auto;display:block;filter:brightness(0) invert(1);}
+.topbar-title{font-family:'Nunito',sans-serif;font-weight:800;color:#fff;font-size:16px;letter-spacing:.01em;}
+.topbar-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;}
+
+/* ── WRAPPER ── */
+.wrap{max-width:860px;margin:0 auto;padding:28px 16px 60px;}
+
+/* ── STEPS ── */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:28px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+.step-item{flex:1;padding:14px 8px;text-align:center;position:relative;cursor:default;}
+.step-item:not(:last-child)::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:1px;height:60%;background:var(--border);}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--border);color:var(--muted);font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;}
+.step-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.step-item.active .step-num{background:var(--blue);color:#fff;}
+.step-item.active .step-label{color:var(--navy);}
+.step-item.done .step-num{background:var(--ok-bg);color:var(--ok);}
+.step-item.done .step-label{color:var(--ok);}
+
+/* ── CARD ── */
+.card{background:#fff;border-radius:14px;border:1px solid var(--border);padding:24px;margin-bottom:16px;}
+.card-title{font-family:'Nunito',sans-serif;font-weight:800;color:var(--navy);font-size:18px;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.card-title .badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 9px;border-radius:20px;background:var(--blue-ice);color:var(--blue);}
+
+/* ── FORM ── */
+label{display:block;font-size:12px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+input[type=text],input[type=email],input[type=date],input[type=number],select{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:14px;color:var(--navy);background:#fff;
+  transition:border .15s;outline:none;
+}
+input[type=text]:focus,input[type=email]:focus,input[type=date]:focus,input[type=number]:focus,select:focus{border-color:var(--blue);}
+.field{margin-bottom:18px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.field-row-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;}
+@media(max-width:560px){.field-row,.field-row-3{grid-template-columns:1fr;}}
+.section-divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.section-sub{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em;}
+.field-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+.field-err{font-size:11px;color:var(--err);margin-top:5px;display:none;}
+.field-err.show{display:block;}
+.age-tag{display:inline-flex;align-items:center;background:var(--blue-ice);color:var(--blue);font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:3px 10px;border-radius:20px;margin-top:6px;}
+.age-tag.hidden{display:none;}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+
+/* ── PLAN CARDS ── */
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.plan-card{border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;background:#fff;position:relative;}
+.plan-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(27,125,196,.1);}
+.plan-card.selected{border-color:var(--blue);background:var(--blue-ice);}
+.op-badge{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;margin-bottom:8px;}
+.op-porto{background:#ebe9ff;color:#5B4CFF;}
+.op-amil{background:#fdecea;color:#8B1A1A;}
+.plan-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--navy);margin-bottom:10px;}
+.plan-badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;}
+.plan-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--bg);color:var(--muted);}
+.plan-badge.nacional{background:#e0ecfb;color:#0A5FA3;}
+.plan-badge.regional{background:#fff3cd;color:#856404;}
+.plan-badge.semcopart{background:#e8f7ed;color:#1a7a3a;}
+.plan-badge.comcopart{background:#fdecea;color:#c0392b;}
+.plan-badge.parcial{background:#fff3cd;color:#856404;}
+.plan-price-full{font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;color:var(--navy);line-height:1;}
+.plan-price-label{font-size:10px;color:var(--muted);margin-top:2px;}
+.plan-price-colab{font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:var(--ok);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.plan-price-colab-label{font-size:10px;color:var(--muted);margin-top:2px;}
+.plan-check{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;background:var(--blue);display:none;align-items:center;justify-content:center;}
+.plan-check svg{width:12px;height:12px;fill:#fff;}
+.plan-card.selected .plan-check{display:flex;}
+
+/* ── REDE ── */
+.section-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:var(--navy);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.rede-regioes{display:flex;flex-direction:column;gap:8px;}
+.rede-regiao-block{background:var(--bg);border-radius:10px;padding:12px 14px;}
+.rede-regiao-nome{font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.rede-hosps{display:flex;flex-wrap:wrap;gap:6px;}
+.rede-hosp-chip{background:#fff;border:1.5px solid #c3e6cb;border-radius:20px;padding:5px 12px;font-size:13px;color:var(--navy);}
+.rede-hosp-chip::before{content:'✓ ';color:var(--ok);font-weight:800;}
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+
+/* ── COPARTICIPAÇÃO ── */
+.copart-note{font-size:11px;color:var(--muted);margin-top:10px;}
+table.copart{width:100%;border-collapse:collapse;font-size:13px;}
+table.copart th{font-family:'Nunito',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:left;color:#fff;}
+table.copart td{padding:9px 12px;border-bottom:1px solid var(--border);}
+table.copart tr:last-child td{border-bottom:none;}
+table.copart td:last-child{text-align:right;font-family:'Nunito',sans-serif;font-weight:700;color:var(--navy);}
+
+/* ── DEPENDENTES ── */
+.dep-card{background:var(--bg);border-radius:10px;padding:16px;margin-bottom:12px;position:relative;}
+.dep-card-title{font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--navy);margin-bottom:12px;}
+.dep-remove{position:absolute;top:12px;right:12px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--muted);}
+.dep-remove:hover{border-color:var(--err);color:var(--err);}
+.dep-price{font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:var(--blue);margin-top:8px;}
+.dep-note{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:13px 28px;border-radius:10px;cursor:pointer;border:none;transition:all .15s;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:#1567a8;}
+.btn-outline{background:#fff;color:var(--navy);border:2px solid var(--border);}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+.btn-add{background:var(--blue-ice);color:var(--blue);border:1.5px dashed var(--blue);border-radius:10px;padding:12px;width:100%;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;cursor:pointer;}
+.btn-add:hover{background:#d4eaf8;}
+.btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:20px;}
+
+/* ── RESUMO ── */
+.resumo-header{background:linear-gradient(135deg,var(--navy-dark),var(--blue));border-radius:12px;padding:20px;color:#fff;margin-bottom:16px;}
+.resumo-nome{font-family:'Nunito',sans-serif;font-weight:900;font-size:22px;}
+.resumo-plano{font-size:14px;color:rgba(255,255,255,.75);margin-top:4px;}
+.resumo-total{font-family:'Nunito',sans-serif;font-weight:900;font-size:30px;margin-top:12px;}
+.resumo-total span{font-size:14px;font-weight:600;opacity:.7;}
+
+.resumo-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;gap:12px;}
+.resumo-row:last-child{border-bottom:none;}
+.resumo-row .rr-label{color:var(--text);}
+.resumo-row .rr-val{font-family:'Nunito',sans-serif;font-weight:700;color:var(--navy);white-space:nowrap;}
+.rr-split-note{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── DISCLAIMER ── */
+.disclaimer{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 16px;font-size:12px;color:#795548;margin-top:12px;}
+
+/* ── SUCCESS ── */
+.success{text-align:center;padding:40px 20px;}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;}
+.success h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:var(--navy);margin-bottom:8px;}
+.success p{color:var(--muted);font-size:14px;}
+
+.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="../Manual da Marca AMV/Corretora Amor _ Vida/assets/logo-horizontal-branca.png" alt="Amor à Vida"
+       onerror="this.src='https://corretoraamoravida.com.br/wp-content/uploads/2023/04/logo-amor-a-vida.svg'">
+  <div>
+    <div class="topbar-title">Simulador de Plano de Saúde · Doman School</div>
+    <div class="topbar-sub">Corretora Amor à Vida</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- STEPS -->
+  <div class="steps" id="steps">
+    <div class="step-item active" data-s="1">
+      <div class="step-num">1</div>
+      <div class="step-label">Titular</div>
+    </div>
+    <div class="step-item" data-s="2">
+      <div class="step-num">2</div>
+      <div class="step-label">Plano</div>
+    </div>
+    <div class="step-item" data-s="3">
+      <div class="step-num">3</div>
+      <div class="step-label">Dependentes</div>
+    </div>
+    <div class="step-item" data-s="4">
+      <div class="step-num">4</div>
+      <div class="step-label">Resumo</div>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 1 ═══════ -->
+  <div id="s1">
+    <div class="card">
+      <div class="card-title">Dados do Colaborador</div>
+
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="nome" placeholder="Ex: João da Silva">
+      </div>
+
+      <div class="field">
+        <label>Data de nascimento</label>
+        <input type="date" id="dataNasc" max="">
+        <div class="age-tag hidden" id="age-tag-titular"></div>
+        <div class="field-err" id="err-dataNasc">Informe uma data válida.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(2)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 2 ═══════ -->
+  <div id="s2" class="hidden">
+    <div class="card">
+      <div class="card-title">Seu Plano de Saúde <span class="badge" id="faixa-badge"></span></div>
+      <div class="plans-grid" id="plans-grid"></div>
+    </div>
+
+    <div class="card hidden" id="rede-card">
+      <div class="section-title" id="rede-title">Rede Credenciada</div>
+      <div id="rede-wrap"></div>
+    </div>
+
+    <div class="card hidden" id="copart-card">
+      <div class="section-title" id="copart-title">Tabela de Coparticipação</div>
+      <div id="copart-wrap"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(1)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 3 ═══════ -->
+  <div id="s3" class="hidden">
+    <div class="card">
+      <div class="card-title">Dependentes</div>
+      <div id="deps-list"></div>
+      <button class="btn-add" onclick="addDep()">+ Adicionar dependente</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(2)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Ver Resumo →</button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 4 ═══════ -->
+  <div id="s4" class="hidden">
+    <div id="resumo-content"></div>
+    <div class="disclaimer">⚠️ Os valores apresentados podem sofrer alterações sem aviso prévio. Esta simulação tem caráter informativo.</div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(3)">← Voltar</button>
+      <button class="btn btn-primary" id="btn-enviar" onclick="enviar()">Enviar Simulação</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="s-success" class="card hidden">
+    <div class="success">
+      <div class="success-icon">✓</div>
+      <h2>Simulação enviada!</h2>
+      <p>Em breve nossa equipe entrará em contato com você.</p>
+      <br>
+      <button class="btn btn-primary" onclick="location.reload()">Nova simulação</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+const SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+
+/* ═══════════════════════════════════════════════
+   DADOS DOS PLANOS
+   (fonte: Análise de Mercado - Doman School.xlsx)
+═══════════════════════════════════════════════ */
+const PLANOS = {
+  amil_bronze_com:{
+    nome:'Bronze', op:'AMIL', cat:'amil', cob:'Regional', copart:'com',
+    v:{'0 a 18':216.17,'19 a 23':293.56,'24 a 28':344.61,'29 a 33':344.61,
+       '34 a 38':344.61,'39 a 43':384.93,'44 a 48':531.59,'49 a 53':634.72,
+       '54 a 58':912.73,'59+':1294.25}
+  },
+};
+
+/* ─── REDE (Amil Bronze) ─── */
+const REDE = [
+  {reg:'Águas Claras',   hosp:'Águas Claras'},
+  {reg:'Asa Sul',        hosp:'Alvorada'},
+  {reg:'Asa Sul',        hosp:'HOB'},
+  {reg:'Lago Sul',       hosp:'Hospital Brasília'},
+  {reg:'Sudoeste',       hosp:'Maternidade Brasília'},
+  {reg:'Todas Unidades', hosp:'Laboratório Exame'},
+];
+
+/* ─── COPARTICIPAÇÃO (Amil Bronze) ─── */
+const COPART = {
+  amil_bronze_com:{
+    title:'Coparticipação — Amil Bronze (completa)',
+    color:'#8B1A1A', bgColor:'#fdecea',
+    header:['Procedimento','Valor por Item'],
+    rows:[
+      ['Consultas eletivas e clínicas','R$ 30,00'],
+      ['Consultas hospitalares — PS','R$ 80,00'],
+      ['Exames básicos','R$ 20,00'],
+      ['Exames especiais','R$ 100,00'],
+      ['Procedimentos básicos','R$ 35,00'],
+      ['Procedimentos especiais','R$ 140,00'],
+      ['Fisioterapia','R$ 60,00'],
+      ['Fonoaudiologia','R$ 60,00'],
+      ['Nutrição','R$ 60,00'],
+      ['Psicoterapia','R$ 60,00'],
+      ['Terapia Ocupacional','R$ 60,00'],
+      ['Internação','R$ 180,00'],
+    ],
+    note:'* Coparticipação aplicada por procedimento realizado.'
+  },
+};
+
+/* ═══════════════════════════════════════════════
+   ESTADO
+═══════════════════════════════════════════════ */
+let state = {step:1, planoKey:'amil_bronze_com', deps:[]};
+
+function fmt(v){
+  return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+function calcIdade(d){
+  const n = new Date(d), h = new Date();
+  if(isNaN(n)) return null;
+  let a = h.getFullYear() - n.getFullYear();
+  const m = h.getMonth() - n.getMonth();
+  if(m < 0 || (m===0 && h.getDate() < n.getDate())) a--;
+  return a >= 0 ? a : null;
+}
+
+function calcFaixa(idade){
+  if(idade === null || idade === undefined) return '';
+  if(idade <= 18) return '0 a 18';
+  if(idade <= 23) return '19 a 23';
+  if(idade <= 28) return '24 a 28';
+  if(idade <= 33) return '29 a 33';
+  if(idade <= 38) return '34 a 38';
+  if(idade <= 43) return '39 a 43';
+  if(idade <= 48) return '44 a 48';
+  if(idade <= 53) return '49 a 53';
+  if(idade <= 58) return '54 a 58';
+  return '59+';
+}
+
+/* ═══════════════════════════════════════════════
+   NAVEGAÇÃO
+═══════════════════════════════════════════════ */
+function goStep(n){
+  if(n===2){
+    const nm = document.getElementById('nome').value.trim();
+    const dn = document.getElementById('dataNasc').value;
+    if(!nm){alert('Informe o nome do colaborador.');return;}
+    if(!dn || calcIdade(dn) === null){
+      document.getElementById('err-dataNasc').classList.add('show');
+      alert('Informe uma data de nascimento válida.');return;
+    }
+    document.getElementById('err-dataNasc').classList.remove('show');
+    fbq('track','ViewContent');
+  }
+  if(n===3 && !state.planoKey){alert('Selecione um plano.');return;}
+
+  ['s1','s2','s3','s4','s-success'].forEach(id =>
+    document.getElementById(id).classList.add('hidden')
+  );
+  document.getElementById('s'+n).classList.remove('hidden');
+  state.step = n;
+  updateSteps();
+
+  if(n===2) renderPlans();
+  if(n===3) renderDeps();
+  if(n===4) renderResumo();
+}
+
+function updateSteps(){
+  document.querySelectorAll('.step-item').forEach(el => {
+    const s = +el.dataset.s;
+    el.classList.remove('active','done');
+    if(s===state.step) el.classList.add('active');
+    else if(s<state.step) el.classList.add('done');
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   PLANOS
+═══════════════════════════════════════════════ */
+function copartBadge(c){
+  if(c==='sem') return '<span class="plan-badge semcopart">Sem Coparticipação</span>';
+  if(c==='com') return '<span class="plan-badge comcopart">Com Coparticipação</span>';
+  return '<span class="plan-badge parcial">Copart. só Terapias</span>';
+}
+
+function renderPlans(){
+  const idade = calcIdade(document.getElementById('dataNasc').value);
+  const faixa = calcFaixa(idade);
+  document.getElementById('faixa-badge').textContent = idade !== null ? idade+' anos' : '';
+  const grid = document.getElementById('plans-grid');
+  grid.innerHTML = '';
+
+  const key = state.planoKey;
+  const p = PLANOS[key];
+  const preco = p.v[faixa] || 0;
+  const div = document.createElement('div');
+  div.className = 'plan-card selected';
+  const cobCls = p.cob==='Nacional' ? 'nacional' : 'regional';
+  div.innerHTML = `
+    <div class="op-badge op-amil">Amil</div>
+    <div class="plan-name">${p.nome}</div>
+    <div class="plan-badges">
+      <span class="plan-badge ${cobCls}">${p.cob}</span>${copartBadge(p.copart)}
+    </div>
+    <div class="plan-price-full">${fmt(preco)}</div>
+    <div class="plan-price-label">valor mensal do titular</div>
+    <div class="plan-check">
+      <svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" stroke="#fff" stroke-width="2" fill="none"/></svg>
+    </div>
+  `;
+  grid.appendChild(div);
+
+  renderRede(key);
+  renderCopart(key);
+}
+
+/* ─── Rede ─── */
+function renderRede(key){
+  document.getElementById('rede-card').classList.remove('hidden');
+  document.getElementById('rede-title').textContent = 'Rede Credenciada — Amil Bronze';
+  const wrap = document.getElementById('rede-wrap');
+  const regioes = [...new Set(REDE.map(r=>r.reg))];
+  const html = regioes.map(reg => {
+    const chips = REDE.filter(r=>r.reg===reg)
+      .map(r=>`<span class="rede-hosp-chip">${r.hosp}</span>`).join('');
+    return `<div class="rede-regiao-block">
+      <div class="rede-regiao-nome">${reg}</div>
+      <div class="rede-hosps">${chips}</div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = `<div class="rede-regioes">${html}</div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px">${REDE.length} hospitais e laboratórios cobertos por este plano.</p>`;
+}
+
+/* ─── Coparticipação ─── */
+function renderCopart(key){
+  const c = COPART[key];
+  const card = document.getElementById('copart-card');
+  if(!c){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  document.getElementById('copart-title').textContent = c.title;
+  const rows = c.rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+  document.getElementById('copart-wrap').innerHTML = `
+    <div class="table-wrap">
+      <table class="copart">
+        <thead><tr style="background:${c.color}">
+          <th>${c.header[0]}</th><th>${c.header[1]}</th>
+        </tr></thead>
+        <tbody style="background:${c.bgColor}">${rows}</tbody>
+      </table>
+    </div>
+    <p class="copart-note">${c.note}</p>
+  `;
+}
+
+/* ═══════════════════════════════════════════════
+   DEPENDENTES
+═══════════════════════════════════════════════ */
+const PARENTESCOS = ['Cônjuge','Filho(a)','Pai','Mãe','Outro'];
+
+function addDep(){ state.deps.push({nome:'',parentesco:'',dataNasc:''}); renderDeps(); }
+function removeDep(i){ state.deps.splice(i,1); renderDeps(); }
+function setDep(i,field,val){ state.deps[i][field]=val; }
+
+function renderDeps(){
+  const list = document.getElementById('deps-list');
+  if(!state.deps.length){
+    list.innerHTML='<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Nenhum dependente adicionado.</p>';
+    return;
+  }
+  list.innerHTML = state.deps.map((d,i) => {
+    const p = PLANOS[state.planoKey];
+    const idadeD = calcIdade(d.dataNasc);
+    const faixa  = calcFaixa(idadeD);
+    const preco  = faixa && p ? p.v[faixa]||0 : 0;
+    const ageTag = idadeD !== null ? `<div class="age-tag">${idadeD} anos · Faixa ${faixa}</div>` : '';
+    const ptOpts = PARENTESCOS.map(pt=>`<option value="${pt}" ${d.parentesco===pt?'selected':''}>${pt}</option>`).join('');
+    return `<div class="dep-card">
+      <div class="dep-card-title">Dependente ${i+1}</div>
+      <button class="dep-remove" onclick="removeDep(${i})">Remover</button>
+      <div class="field-row">
+        <div class="field">
+          <label>Nome</label>
+          <input type="text" value="${d.nome}" placeholder="Nome do dependente" oninput="setDep(${i},'nome',this.value)">
+        </div>
+        <div class="field">
+          <label>Parentesco</label>
+          <select onchange="setDep(${i},'parentesco',this.value)">
+            <option value="">Selecione…</option>${ptOpts}
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Data de nascimento</label>
+        <input type="date" value="${d.dataNasc}" max="${new Date().toISOString().split('T')[0]}"
+          onchange="setDep(${i},'dataNasc',this.value);renderDeps()">${ageTag}
+      </div>
+      ${preco>0 ? `<div class="dep-price">${fmt(preco)} / mês</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   RESUMO
+═══════════════════════════════════════════════ */
+function renderResumo(){
+  const nome     = document.getElementById('nome').value.trim();
+  const dataNasc = document.getElementById('dataNasc').value;
+  const idadeVal = calcIdade(dataNasc);
+  const faixa    = calcFaixa(idadeVal);
+  const p        = PLANOS[state.planoKey];
+  const vlTitular = p.v[faixa] || 0;
+
+  let totalDeps = 0;
+  let rowsDeps  = '';
+  state.deps.forEach((d,i) => {
+    const idadeD = calcIdade(d.dataNasc);
+    const df = calcFaixa(idadeD);
+    const vd = df && p ? p.v[df]||0 : 0;
+    totalDeps += vd;
+    rowsDeps += `<div class="resumo-row">
+      <div>
+        <div class="rr-label">Dep. ${i+1} — ${d.nome||'—'} (${d.parentesco||'—'}, ${idadeD !== null ? idadeD+' anos' : '—'})</div>
+        <div class="rr-split-note">Faixa ${df||'—'}</div>
+      </div>
+      <span class="rr-val">${fmt(vd)}</span>
+    </div>`;
+  });
+
+  const totalGeral = vlTitular + totalDeps;
+
+  document.getElementById('resumo-content').innerHTML = `
+    <div class="resumo-header">
+      <div class="resumo-nome">${nome}</div>
+      <div class="resumo-plano">Amil · ${p.nome} · ${p.cob} · ${copartBadge(p.copart).replace(/<[^>]+>/g,'')}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:6px">
+        <span>${idadeVal} anos · Faixa ${faixa}</span>
+      </div>
+      <div class="resumo-total">${fmt(totalGeral)} <span>/ mês (total)</span></div>
+    </div>
+
+    <div class="card">
+      <div class="resumo-row">
+        <div>
+          <div class="rr-label">Titular — ${idadeVal} anos · Faixa ${faixa}</div>
+        </div>
+        <span class="rr-val">${fmt(vlTitular)}</span>
+      </div>
+      ${rowsDeps}
+      ${totalDeps > 0 ? `
+      <div class="resumo-row">
+        <div>
+          <div class="rr-label">Subtotal dependentes</div>
+        </div>
+        <span class="rr-val">${fmt(totalDeps)}</span>
+      </div>` : ''}
+      <div class="resumo-row" style="border-top:2px solid var(--navy);margin-top:4px;padding-top:14px">
+        <span class="rr-label" style="font-weight:700;color:var(--navy)">Total mensal (plano completo)</span>
+        <span class="rr-val" style="font-size:18px;color:var(--blue)">${fmt(totalGeral)}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════
+   ENVIO
+═══════════════════════════════════════════════ */
+async function enviar(){
+  const btn = document.getElementById('btn-enviar');
+  btn.textContent = 'Enviando…'; btn.disabled = true;
+
+  const nome      = document.getElementById('nome').value.trim();
+  const dataNascE = document.getElementById('dataNasc').value;
+  const idadeEnv  = calcIdade(dataNascE);
+  const faixa     = calcFaixa(idadeEnv);
+  const p         = PLANOS[state.planoKey];
+  const vlTitular  = p.v[faixa] || 0;
+  const totalDeps  = state.deps.reduce((s,d) => {
+    const df = calcFaixa(calcIdade(d.dataNasc));
+    return s + (df && p ? p.v[df]||0 : 0);
+  }, 0);
+
+  const payload = {
+    empresa: 'Doman School',
+    nome,
+    dataNasc: dataNascE, idade: idadeEnv, faixa,
+    plano:      p.nome,
+    operadora:  p.op,
+    cobertura:  p.cob,
+    coparticipacao: p.copart,
+    vlTitular,
+    vlDeps:     totalDeps,
+    vlTotal:    vlTitular + totalDeps,
+    numDeps:    state.deps.length,
+    deps: state.deps.map(d=>`${d.nome||'—'} (${d.parentesco}, ${calcIdade(d.dataNasc)} anos)`).join(' | '),
+  };
+
+  try{
+    await fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify(payload)});
+    fbq('track','Lead',{content_name:'Doman School - '+p.nome, currency:'BRL'});
+  }catch(e){}
+
+  ['s1','s2','s3','s4'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('s-success').classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  const dnInput = document.getElementById('dataNasc');
+  dnInput.max = today;
+
+  dnInput.addEventListener('change', () => {
+    const tag = document.getElementById('age-tag-titular');
+    const err = document.getElementById('err-dataNasc');
+    const idade = calcIdade(dnInput.value);
+    if(idade !== null && idade >= 0){
+      const faixa = calcFaixa(idade);
+      tag.textContent = idade + ' anos · Faixa ' + faixa;
+      tag.classList.remove('hidden');
+      err.classList.remove('show');
+    } else {
+      tag.classList.add('hidden');
+    }
+  });
+});
+</script>
+</body>
+</html>
