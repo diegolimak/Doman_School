@@ -154,6 +154,14 @@ table.copart td:last-child{text-align:right;font-family:'Nunito',sans-serif;font
 .resumo-row .rr-val{font-family:'Nunito',sans-serif;font-weight:700;color:var(--navy);white-space:nowrap;}
 .rr-split-note{font-size:11px;color:var(--muted);margin-top:2px;}
 
+/* ── INTERESSE ── */
+.interesse-opts{display:flex;flex-direction:column;gap:10px;}
+.interesse-opt{border:2px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;color:var(--navy);transition:all .15s;}
+.interesse-opt:hover{border-color:var(--blue);background:var(--blue-ice);}
+.interesse-opt.selected{border-color:var(--blue);background:var(--blue-ice);}
+.interesse-opt.selected::before{content:'✓ ';color:var(--blue);}
+
 /* ── DISCLAIMER ── */
 .disclaimer{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px 16px;font-size:12px;color:#795548;margin-top:12px;}
 
@@ -261,6 +269,17 @@ table.copart td:last-child{text-align:right;font-family:'Nunito',sans-serif;font
   <!-- ═══════ STEP 4 ═══════ -->
   <div id="s4" class="hidden">
     <div id="resumo-content"></div>
+
+    <div class="card">
+      <div class="card-title">Tem interesse no plano de saúde?</div>
+      <div class="interesse-opts" id="interesse-opts">
+        <div class="interesse-opt" data-val="SIM SO PRA MIM" onclick="setInteresse(this)">Sim, só pra mim</div>
+        <div class="interesse-opt" data-val="SIM COM OS MEUS DEPENDENTES" onclick="setInteresse(this)">Sim, com os meus dependentes</div>
+        <div class="interesse-opt" data-val="NAO" onclick="setInteresse(this)">Não</div>
+      </div>
+      <div class="field-err" id="err-interesse">Selecione uma opção.</div>
+    </div>
+
     <div class="disclaimer">⚠️ Os valores apresentados podem sofrer alterações sem aviso prévio. Esta simulação tem caráter informativo.</div>
     <div class="btn-row">
       <button class="btn btn-outline" onclick="goStep(3)">← Voltar</button>
@@ -334,7 +353,14 @@ const COPART = {
 /* ═══════════════════════════════════════════════
    ESTADO
 ═══════════════════════════════════════════════ */
-let state = {step:1, planoKey:'amil_bronze_com', deps:[]};
+let state = {step:1, planoKey:'amil_bronze_com', deps:[], interesse:null};
+
+function setInteresse(el){
+  document.querySelectorAll('.interesse-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  state.interesse = el.dataset.val;
+  document.getElementById('err-interesse').classList.remove('show');
+}
 
 function fmt(v){
   return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
@@ -613,6 +639,12 @@ function renderResumo(){
    ENVIO
 ═══════════════════════════════════════════════ */
 async function enviar(){
+  if(!state.interesse){
+    document.getElementById('err-interesse').classList.add('show');
+    document.getElementById('interesse-opts').scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
   const btn = document.getElementById('btn-enviar');
   btn.textContent = 'Enviando…'; btn.disabled = true;
 
@@ -640,6 +672,7 @@ async function enviar(){
     vlTotal:    vlTitular + totalDeps,
     numDeps:    state.deps.length,
     deps: state.deps.map(d=>`${d.nome||'—'} (${d.parentesco}, ${calcIdade(d.dataNasc)} anos)`).join(' | '),
+    interesse: state.interesse,
   };
 
   try{
